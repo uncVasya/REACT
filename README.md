@@ -11,6 +11,8 @@
 
 ![image](https://user-images.githubusercontent.com/101925640/196121489-4a985293-712f-4156-96bf-873a32896747.png)
 
+/converter
+
 Интерактивный конвертер валют, 
 API запрос на https://cdn.cur.su/api/latest.json
 
