@@ -2,12 +2,26 @@ import React from 'react';
 import './index.scss';
 import Collection from './Component/Collection/Collection';
 
+const cats = [
+  { name: 'Все' },
+  { name: 'Море' },
+  { name: 'Горы' },
+  { name: 'Архитектура' },
+  { name: 'Города' },
+];
+
 function App() {
+  const [categoryId, setCategoryId] = React.useState(0);
   const [collections, setCollections] = React.useState([]);
+  const [isLoadin, setIsLoading] = React.useState(true);
   const [searchValue, setSearchValue] = React.useState('');
+  const [page, setPage] = React.useState(1);
 
   React.useEffect(() => {
-    fetch('https://634ead2b4af5fdff3a64007d.mockapi.io/Photo-collection')
+    setIsLoading(true);
+    const category = categoryId ? `category=${categoryId}` : '';
+
+    fetch(`https://634ead2b4af5fdff3a64007d.mockapi.io/Photo-collection?page=${page}&limit=3&${category}`)
       .then((resp) => resp.json())
       .then((json) => {
         setCollections(json);
@@ -16,19 +30,17 @@ function App() {
       .catch((err) => {
         console.warn(err);
         alert('JSON не получен');
-      });
-  }, []);
-
+      })
+      .finally(() => setIsLoading(false));
+  }, [categoryId, page]);
   return (
     <div className="App">
       <h1>Моя коллекция фотографий</h1>
       <div className="top">
         <ul className="tags">
-          <li className="active">Все</li>
-          <li>Горы</li>
-          <li>Море</li>
-          <li>Архитектура</li>
-          <li>Города</li>
+          {cats.map((el, index) => (
+            <li onClick={() => setCategoryId(index)} className={index === categoryId ? 'active' : ''} key={el.name}>{el.name}</li>
+          ))}
         </ul>
         <input
           value={searchValue}
@@ -38,21 +50,26 @@ function App() {
         />
       </div>
       <div className="content">
-        {collections
-          .filter((el) => el.name.toLowerCase().includes(searchValue.toLocaleLowerCase()))
-          .map((el, index) => (
-            <Collection
-              key={index}
-              name={el.name}
-              images={el.photos}
-            />
-          ))}
+        {isLoadin ? (
+          <h2>Загрузка данных...</h2>
+        ) : (
+          collections
+            .filter((el) => el.name.toLowerCase().includes(searchValue.toLocaleLowerCase()))
+            .map((el, index) => (
+              <Collection
+                key={index}
+                name={el.name}
+                images={el.photos}
+              />
+            )))}
 
       </div>
       <ul className="pagination">
-        <li>1</li>
-        <li className="active">2</li>
-        <li>3</li>
+        {
+          [...Array(5)].map((el, index) => (
+            <li onClick={() => setPage((index + 1))} className={page === (index + 1) ? 'active' : ''}>{index + 1}</li>
+          ))
+        }
       </ul>
     </div>
   );
